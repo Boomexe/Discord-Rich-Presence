@@ -31,7 +31,6 @@ def saveSettings():
         json.dump(settings,data)
 
 loadSettings()
-print(settings)
 
 def showNotif(Title,Text): 
     messagebox.showinfo(Title, Text)
@@ -57,7 +56,6 @@ def checkBlank():
         if applicationId == '':
             checkBlank()
 
-print('Application ID:',applicationId)
 print('Started Discord Presence')
 
 def startPresence():
@@ -65,6 +63,8 @@ def startPresence():
     global largeImage
     global details
     global state
+
+    saveSettings()
 
     try:
         rpc = Presence(applicationId)
