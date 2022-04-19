@@ -13,7 +13,8 @@ assetsDir = path.join(cwd,'assets')
 discordIconDir = path,join(assetsDir,'discordicon.ico')
 settingDir = path.join(cwd,'settings.json')
 
-success = False
+startupRun = False
+connected = False
 
 window = tk.Tk()
 window.title('Custom Discord Rich Presence')
@@ -28,7 +29,13 @@ def loadSettings():
 
 def saveSettings():
     with open(settingDir,'w') as data:
-        json.dump(settings,data)
+
+       settings['application_id'] = applicationIdEntry.get()
+       settings['large_image'] = largeImageEntry.get()
+       settings['details'] = detailsEntry.get()
+       settings['state'] = stateEntry.get()
+       
+       json.dump(settings,data)
 
 loadSettings()
 
@@ -44,40 +51,29 @@ def quit(Title,Text):
     if quitPrompt == True:
         exit()
 
-applicationId = settings['application_id']
-largeImage = settings['large_image']
-details = settings['details']
-state = settings['state']
-
-def checkBlank():
-    global applicationId
-    if applicationId == '':
-        applicationId = input('Discord application id not found! Please enter one here\n>>> ')
-        if applicationId == '':
-            checkBlank()
-
 print('Started Discord Presence')
 
 def startPresence():
     global rpc
-    global largeImage
-    global details
-    global state
 
     saveSettings()
+    loadSettings()
+
+    print(settings)
 
     try:
-        rpc = Presence(applicationId)
-        rpc.connect()
-
-        showNotif('Notification','Rich Presences Updated.')
+        if not connected:
+            rpc = Presence(settings['application_id'])
+            rpc.connect()
 
         try:
             rpc.update(
-                details = details,
-                state =  state,
-                large_image = largeImage
+                details = settings['details'],
+                state =  settings['state'],
+                large_image = settings['large_image']
             )
+
+            showNotif('Notification','Rich Presences Updated.')
         
         except:
             showError('ERROR','Could not update Discord Rich Presence! Make sure you have your Discord launched.')
@@ -102,7 +98,7 @@ applicationIdEntry = tk.Entry(
     justify = tk.CENTER
 )
 
-applicationIdEntry.insert(0,applicationId)
+applicationIdEntry.insert(0,settings['application_id'])
 
 # Large image Widgets
 largeImageLabel = tk.Label(
@@ -115,7 +111,7 @@ largeImageEntry = tk.Entry(
     justify = tk.CENTER
 )
 
-largeImageEntry.insert(0,largeImage)
+largeImageEntry.insert(0,settings['large_image'])
 
 # Details Widgets
 detailsLabel = tk.Label(
@@ -128,7 +124,7 @@ detailsEntry = tk.Entry(
     justify = tk.CENTER
 )
 
-detailsEntry.insert(0,details)
+detailsEntry.insert(0,settings['details'])
 
 # State Widgets
 stateLabel = tk.Label(
@@ -140,7 +136,7 @@ stateEntry = tk.Entry(
     justify = tk.CENTER
 )
 
-stateEntry.insert(0,state)
+stateEntry.insert(0,settings['state'])
 
 startButton = tk.Button(
     text    = 'START/UPDATE',
